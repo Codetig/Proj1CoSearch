@@ -1,0 +1,24 @@
+div {
+	width: 98%;
+	margin: 0 auto;
+}
+#search-form {
+	padding: 0;
+	padding-top: 20px;
+	padding-bottom: 10px;
+	height: 90px;
+	background: rgba(153, 250, 250, 0.4);
+	border-radius: 10px;
+}
+.co-focus {
+	text-align: center;
+	
+}
+.co-focus li {
+	list-style-type: none;
+}
+label, input {
+	height: 50px;
+	font-size: 25px;
+	vertical-align: middle;
+}
