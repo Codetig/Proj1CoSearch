@@ -73,31 +73,61 @@ $(document).ready(function(){
 		$("#search-term").val("");
 		$('h3,h5,p,.show li,hr,#saveCo,.co-focus a').remove(); //need to remove old search
 
-		$.getJSON("https://api.crunchbase.com/v/2/organizations?&user_key="+cbKey+"&name=" + company,
-			function(info){
-				var items =info.data.items;
-				var collection = [];
+		$.ajax({
+			dataType: "jsonp",
+			url: "https://api.crunchbase.com/v/2/organizations?&user_key="+cbKey+"&name=" + company,
+			success: function(info){
+					var items =info.data.items;
+					var collection = [];
 
-				$("#results li").remove();
-				for(var i=0; i < items.length; i++){
-					collection.push(items[i].name);
-				}
-				collection.forEach(function(n,i){
-					if(i < 20){
-						$("#results ul").append('<li><a>' + n + '</a></li>');
+					$("#results li").remove();
+					for(var i=0; i < items.length; i++){
+						collection.push(items[i].name);
 					}
-				});
-				$('#results').fadeIn(500);
-				$('#results #full').on("click", function(e){
-					$('#results').hide();
-					$('#results li').remove();
-					collection.forEach(function(n){
-						$("#results ul").append("<li><a>" + n + "</a></li>");
+					collection.forEach(function(n,i){
+						if(i < 20){
+							$("#results ul").append('<li><a>' + n + '</a></li>');
+						}
 					});
-					$('#results').fadeIn(100);
-					$('#results #full').fadeOut(0);
-				});	
-			});	
+					$('#results').fadeIn(500);
+					$('#results #full').on("click", function(e){
+						$('#results').hide();
+						$('#results li').remove();
+						collection.forEach(function(n){
+							$("#results ul").append("<li><a>" + n + "</a></li>");
+						});
+						$('#results').fadeIn(100);
+						$('#results #full').fadeOut(0);
+					});	
+				}
+		});
+
+		//chrome was unable to process the data due to cross domain call so I had to use JSONP
+		// $.getJSON("https://api.crunchbase.com/v/2/organizations?&user_key="+cbKey+"&name=" + company,
+		// 	function(info){
+		// 		var items =info.data.items;
+		// 		var collection = [];
+
+		// 		$("#results li").remove();
+		// 		for(var i=0; i < items.length; i++){
+		// 			collection.push(items[i].name);
+		// 		}
+		// 		collection.forEach(function(n,i){
+		// 			if(i < 20){
+		// 				$("#results ul").append('<li><a>' + n + '</a></li>');
+		// 			}
+		// 		});
+		// 		$('#results').fadeIn(500);
+		// 		$('#results #full').on("click", function(e){
+		// 			$('#results').hide();
+		// 			$('#results li').remove();
+		// 			collection.forEach(function(n){
+		// 				$("#results ul").append("<li><a>" + n + "</a></li>");
+		// 			});
+		// 			$('#results').fadeIn(100);
+		// 			$('#results #full').fadeOut(0);
+		// 		});	
+		// 	});	
 	});
 
 	$("#results ul").on("click", "li", function(e){
@@ -106,13 +136,15 @@ $(document).ready(function(){
 		$("#results").fadeOut(200);
 		
 			
-			$.getJSON("https://api.crunchbase.com/v/2/organization/" +selCompany +"?&user_key="+cbKey,
-				function(detail){
+			$.ajax({
+				dataType: "jsonp",
+				url: "https://api.crunchbase.com/v/2/organization/" +selCompany +"?&user_key="+cbKey,
+				success: function(detail){
 					if(!(detail.data.properties && detail.data.relationships.categories && detail.data.relationships.news)){
-						$('#results').fadeIn(100); 
-						var errmsg = 'No information on "'+ selCompany +'" at the moment. \n\n Choose another list item or visit their <a target="_blank" href="https://www.crunchbase.com/organization/' + selCompany + '">Crunchbase website</a>';
-						return $('#results ul').before('<p>'+errmsg+'</p>');
-				}
+							$('#results').fadeIn(100); 
+							var errmsg = 'No information on "'+ selCompany +'" at the moment. \n\n Choose another list item or visit their <a target="_blank" href="https://www.crunchbase.com/organization/' + selCompany + '">Crunchbase website</a>';
+							return $('#results ul').before('<p>'+errmsg+'</p>');
+					}
 					var props = detail.data.properties;
 					var cats = detail.data.relationships.categories.items;
 					var news = detail.data.relationships.news.items;
@@ -137,21 +169,69 @@ $(document).ready(function(){
 					displayDetails(currentCo);
 
 					$('.co-focus').append('<br><a id="saveCo" class="btn btn-primary">Save Company</a>');
-					$('#saveCo').on('click',function(){
-						if(lsGetMe(currentCo.coName)||false){
-							$('#saveCo').attr('class', 'btn btn-warning');
-							if(confirm("Update this Company's data?")){
+						$('#saveCo').on('click',function(){
+							if(lsGetMe(currentCo.coName)||false){
+								$('#saveCo').attr('class', 'btn btn-warning');
+								if(confirm("Update this Company's data?")){
+									window.localStorage.setItem(currentCo.coName, JSON.stringify(currentCo));
+									$('#saveCo').attr('class', 'btn btn-success');
+									$('#saveCo').text('Saved');
+								}
+							} else{
 								window.localStorage.setItem(currentCo.coName, JSON.stringify(currentCo));
 								$('#saveCo').attr('class', 'btn btn-success');
 								$('#saveCo').text('Saved');
 							}
-						} else{
-							window.localStorage.setItem(currentCo.coName, JSON.stringify(currentCo));
-							$('#saveCo').attr('class', 'btn btn-success');
-							$('#saveCo').text('Saved');
-						}
-					});
+						});
+					}
 			});
+
+			// $.getJSON("https://api.crunchbase.com/v/2/organization/" +selCompany +"?&user_key="+cbKey,
+			// 	function(detail){
+			// 		if(!(detail.data.properties && detail.data.relationships.categories && detail.data.relationships.news)){
+			// 			$('#results').fadeIn(100); 
+			// 			var errmsg = 'No information on "'+ selCompany +'" at the moment. \n\n Choose another list item or visit their <a target="_blank" href="https://www.crunchbase.com/organization/' + selCompany + '">Crunchbase website</a>';
+			// 			return $('#results ul').before('<p>'+errmsg+'</p>');
+			// 	}
+			// 		var props = detail.data.properties;
+			// 		var cats = detail.data.relationships.categories.items;
+			// 		var news = detail.data.relationships.news.items;
+
+			// 		//converting to my object
+			// 		var currentCo = new CompanyObj(props.name);
+			// 		currentCo.coAlias =  props.also_known_as || "";
+			// 		currentCo.coDescr = props.description;
+			// 		currentCo.coFoundedOn = props.founded_on;
+			// 		currentCo.empNo = props.number_of_employees;
+			// 		currentCo.coHQCity = detail.data.relationships.headquarters.items[0].city + detail.data.relationships.headquarters.items[0].region;
+			// 		currentCo.forProfit = props.secondary_role_for_profit;
+			// 		currentCo.focusAreas = cats.map(function(val){return val.name;});
+			// 		currentCo.coWebsite = props.homepage_url;
+			// 		currentCo.coCBSite = 'https://www.crunchbase.com/organization/' + currentCo.coName;
+			// 		currentCo.coLogoUrl = currentCo.coCBSite +detail.data.relationships.primary_image.items[0].path;
+			// 		currentCo.coNews.headline = news.map(function(val){return val.title;});
+			// 		currentCo.coNews.url = news.map(function(val){return val.url;});
+			// 		currentCo.coNews.author = news.map(function(val){return val.author;});
+			// 		currentCo.coNews.postDate = news.map(function(val){return val.posted_on;});
+					
+			// 		displayDetails(currentCo);
+
+			// 		$('.co-focus').append('<br><a id="saveCo" class="btn btn-primary">Save Company</a>');
+			// 		$('#saveCo').on('click',function(){
+			// 			if(lsGetMe(currentCo.coName)||false){
+			// 				$('#saveCo').attr('class', 'btn btn-warning');
+			// 				if(confirm("Update this Company's data?")){
+			// 					window.localStorage.setItem(currentCo.coName, JSON.stringify(currentCo));
+			// 					$('#saveCo').attr('class', 'btn btn-success');
+			// 					$('#saveCo').text('Saved');
+			// 				}
+			// 			} else{
+			// 				window.localStorage.setItem(currentCo.coName, JSON.stringify(currentCo));
+			// 				$('#saveCo').attr('class', 'btn btn-success');
+			// 				$('#saveCo').text('Saved');
+			// 			}
+			// 		});
+			// });
 		});
 });
 	
