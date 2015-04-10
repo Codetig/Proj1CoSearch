@@ -21,8 +21,11 @@ label, input {
 	font-size: 25px;
 	vertical-align: middle;
 }
+.show {
+	background-color: rgba(255, 245, 238, 0.7); 
+}
 #saved-co{
-	height: 500px;
+	height: 800px;
 	background-image: url("coffee.png");
 	background-size: cover;
 	font-size: 120%;

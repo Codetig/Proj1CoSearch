@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	var cbKey ="7d6130439b66ee4856835a66ad3d07a0";
+	
 	$('#results').hide();
 	//Safari appears to have 9 objects in local storage by default, hence the odd if statement
 	if(window.localStorage.length === 0){
@@ -56,6 +56,7 @@ $(document).ready(function(){
 			$(".co-focus ul").append('<li>' + myObj.focusAreas[i] +'</li>');
 		}
 		$('.co-focus').append('<a target="_blank" href="'+myObj.coWebsite+'">' + myObj.coName + ' website</a><br>');
+		$('.co-focus').append('<a target="_blank" href="'+myObj.coCBSite+'">Crunchbase website</a><br>');
 
 		//news div
 		$(".co-news ul").before("<h3>News: "+ myObj.coName +"</h3>");
@@ -63,12 +64,14 @@ $(document).ready(function(){
 			$(".co-news ul").append('<li><a target="_blank" href="'+myObj.coNews.url+'">' + myObj.coNews.headline[n] + ' </a>by '+myObj.coNews.author[n]+' '+myObj.coNews.postDate[n]+'</li>');
 		}
 	}
+
+	var cbKey ="7d6130439b66ee4856835a66ad3d07a0";
 	
 	$("#search-form").on("submit", function(e){
 		var company = $("#search-term").val();
 		$('#saved-co').hide(); //hide saved companies
 		$("#search-term").val("");
-		$('h3,h5,p,.show li,hr,#saveCo').remove(); //need to remove old search
+		$('h3,h5,p,.show li,hr,#saveCo,.co-focus a').remove(); //need to remove old search
 
 		$.getJSON("https://api.crunchbase.com/v/2/organizations?&user_key="+cbKey+"&name=" + company,
 			function(info){
